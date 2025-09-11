@@ -174,11 +174,10 @@ async function syncModulesAndEvents() {
 // ============= KHỞI ĐỘNG GIAO DIỆN LOGO, QUẢNG CÁO, UPDATE... =============
 
 (async () => {
-  // Dynamic import ESM modules (boxen, chalk-animation)
   const boxen = (await import('boxen')).default;
   const chalkAnimation = await import('chalk-animation');
 
-  // Animation khởi động - bên trái
+  // Animation khởi động
   const anim = chalkAnimation.default.rainbow('>>> MIRAI đang khởi động... <<<');
   await new Promise(r => setTimeout(r, 3000));
   anim.stop();
@@ -189,6 +188,7 @@ async function syncModulesAndEvents() {
       return shuffled.slice(0, count);
   }
 
+  // Logo
   CFonts.say('MIRAI BOT', {
     font: 'block',
     align: 'left',
@@ -200,7 +200,7 @@ async function syncModulesAndEvents() {
     maxLength: '0'
   });
 
-  CFonts.say('PCODER', {
+  CFonts.say('DVT', {
     font: 'block',
     align: 'left',
     colors: getRandomColors(6),
@@ -211,14 +211,11 @@ async function syncModulesAndEvents() {
     maxLength: '0'
   });
 
-  // Quảng cáo nổi bật, có khung, emoji, nhiều màu sắc
-  const fb = chalk.hex('#00acee').underline.bold('https://fb.com/pcoder090');
-  const zalo = chalk.hex('#25d366').underline.bold('https://zalo.me/0786888655');
+  // Quảng cáo
+  const fb = chalk.hex('#00acee').underline.bold('https://fb.com/dvt2k9');
   const banner =
-    chalk.hex('#FFD700').bold('⚡ MUA FILE BOT - LIÊN HỆ NGAY! ⚡\n') +
+    chalk.hex('#FFD700').bold('⚡ FILE BOT VIP! ⚡\n') +
     chalk.white('Facebook: ') + fb +
-    chalk.hex('#FFD700').bold(' | ') +
-    chalk.white('Zalo: ') + zalo +
     ' ' + chalk.redBright('🔥');
   console.log(
     boxen(banner, {
@@ -260,10 +257,10 @@ async function syncModulesAndEvents() {
     console.log(chalk.redBright(`[ERROR] Không thể kiểm tra/cập nhật phiên bản mới: ${e.message}`));
   }
 
-  // ĐỒNG BỘ MODULES/COMMANDS & EVENTS CHỈ THÊM MỚI (KHÔNG XÓA)
+  // ĐỒNG BỘ MODULES
   await syncModulesAndEvents();
 
-  // Thông tin trạng thái và slogan (bên trái)
+  // Thông tin trạng thái
   const now = moment().format("YYYY-MM-DD HH:mm:ss");
   console.log(
     chalk.bgRed.white.bold(`  ${now}  `) +
@@ -272,10 +269,10 @@ async function syncModulesAndEvents() {
     chalk.bgYellow.black.bold(`  PID: ${process.pid}  `)
   );
   console.log(chalk.hex('#FFD700')('='.repeat(50)));
-  console.log(chalk.hex('#ff00cc').italic('MiraiBot | PCODER | Chúc bạn một ngày chạy bot vui vẻ!'));
+  console.log(chalk.hex('#ff00cc').italic('MiraiBot | DVT | Chúc bạn một ngày chạy bot vui vẻ!'));
   console.log(chalk.hex('#FFD700')('='.repeat(50)));
 
-  // Fancy Logger + Package/Module Check
+  // Fancy Logger
   const fancyLog = (type, msg, tag = "") => {
     let icons = { success: '✔', warn: '⚠', error: '✖', info: 'ℹ' };
     let colors = {
@@ -386,103 +383,69 @@ async function syncModulesAndEvents() {
             'content-type': 'application/x-www-form-urlencoded',
             "x-fb-friendly-name": form["fb_api_req_friendly_name"],
             'x-fb-http-engine': 'Liger',
-            'user-agent': 'Mozilla/5.0 (Linux; Android 12; TECNO CH9 Build/SP1A.210812.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/109.0.5414.118 Mobile Safari/537.36[FBAN/EMA;FBLC/pt_BR;FBAV/339.0.0.10.100;]',
+            'user-agent': 'Mozilla/5.0 (Linux; Android 12; TECNO CH9 Build/SP1A.210812.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/106.0.5249.79 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/389.0.0.38.105;]'
         }
+    };
+
+    try {
+        let data = await axios(options);
+        if(data.data.error) {
+            if(data.data.error.error_subcode == 1348162) {
+                let code_2fa = totp(fa.replace(/\s+/g, '').toLowerCase());
+                form.twofactor_code = code_2fa;
+                form.credentials_type = 'two_factor';
+                form.userid = data.data.error.error_data.uid;
+                form.first_factor = data.data.error.error_data.login_first_factor;
+                form.machine_id = data.data.error.error_data.machine_id;
+                form.sig = encodesig(sort(form));
+                let dat = await axios(options);
+                if(dat.data.error) return console.log(dat.data);
+                else {
+                    console.log(dat.data);
+                    let token = dat.data.access_token;
+                    let cookies = dat.data.session_cookies.map(i => i.name + "=" + i.value).join(";");
+                    fs.writeFileSync('./token.json', JSON.stringify({ACCESSTOKEN: token, COOKIE: cookies}, null, 4));
+                    fancyLog("success", "Đã đăng nhập thành công, vui lòng chạy lại bot", "LOGIN");
+                }
+            }
+        } else {
+            console.log(data.data);
+            let token = data.data.access_token;
+            let cookies = data.data.session_cookies.map(i => i.name + "=" + i.value).join(";");
+            fs.writeFileSync('./token.json', JSON.stringify({ACCESSTOKEN: token, COOKIE: cookies}, null, 4));
+            fancyLog("success", "Đã đăng nhập thành công, vui lòng chạy lại bot", "LOGIN");
+        }
+    } catch (e) {
+        console.log(e.response?.data || e.message);
     }
-    axios(options).then(i => {
-      var sessionCookies = i.data.session_cookies;
-      var cookies = sessionCookies.reduce((acc, cookie) => acc += `${cookie.name}=${cookie.value};`, "");
-      if(i.data.access_token){
-        configLogin.ACCESSTOKEN = i.data.access_token
-        saveConfig(configLogin)
-      }
-    }).catch(async function (error) {
-      var data = error.response.data.error.error_data;
-      form.twofactor_code = totp(decodeURI(fa).replace(/\s+/g, '').toLowerCase())
-      form.encrypted_msisdn = ""
-      form.userid = data.uid
-      form.machine_id = data.machine_id
-      form.first_factor = data.login_first_factor
-      form.credentials_type = "two_factor"
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      delete form.sig
-      form.sig = encodesig(sort(form))
-      var option_2fa = {
-          url: 'https://b-graph.facebook.com/auth/login',
-          method: 'post',
-          data: form,
-          transformRequest: [
-              (data, headers) => {
-                  return require('querystring').stringify(data)
-              },
-          ],
-          headers: {
-              'content-type': 'application/x-www-form-urlencoded',
-              'x-fb-http-engine': 'Liger',
-              'user-agent': 'Mozilla/5.0 (Linux; Android 12; TECNO CH9 Build/SP1A.210812.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/109.0.5414.118 Mobile Safari/537.36[FBAN/EMA;FBLC/pt_BR;FBAV/339.0.0.10.100;]',
-          }
-      }
-      axios(option_2fa).then(i => {
-        var sessionCookies = i.data.session_cookies;
-        var cookies = sessionCookies.reduce((acc, cookie) => acc += `${cookie.name}=${cookie.value};`, "");
-        if(i.data.access_token){
-          configLogin.ACCESSTOKEN = i.data.access_token
-          saveConfig(configLogin)
-        }
-      }).catch(function (error) {
-        fancyLog("error", error.response.data, "LOGIN");
-      })
+  }
+
+  function encodesig(data) {
+    let sig = "";
+    Object.keys(data).forEach(function (key) {
+        sig += key + "=" + data[key];
     });
+    sig += "62f8ce9f74b12f84c123cc23437a4a32";
+    return require('crypto').createHash('md5').update(sig).digest("hex");
   }
 
-  function saveConfig(data) {
-    setTimeout(()=>{
-      const json = JSON.stringify(data,null,4);
-      fs.writeFileSync(`./config.json`, json);
-    },50)
+  function sort(data) {
+    return Object.keys(data).sort().reduce((acc, key) => {
+      acc[key] = data[key];
+      return acc;
+    }, {});
   }
+
   function randomString(length) {
-      length = length || 10
-      var char = 'abcdefghijklmnopqrstuvwxyz'
-      char = char.charAt(
-          Math.floor(Math.random() * char.length)
-      )
-      for (var i = 0; i < length - 1; i++) {
-          char += 'abcdefghijklmnopqrstuvwxyz0123456789'.charAt(
-              Math.floor(36 * Math.random())
-          )
-      }
-      return char
-  }
-  function encodesig(string) {
-      var data = ''
-      Object.keys(string).forEach(function (info) {
-          data += info + '=' + string[info]
-      })
-      data = md5(data + '62f8ce9f74b12f84c123cc23437a4a32')
-      return data
-  }
-  function md5(string) {
-      return require('crypto').createHash('md5').update(string).digest('hex')
-  }
-  function sort(string) {
-      var sor = Object.keys(string).sort(),
-          data = {},
-          i
-      for (i in sor)
-          data[sor[i]] = string[sor[i]]
-      return data
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
   }
 
-  async function startb(){
-    if(configLogin.ACCESSTOKEN !== "") {
-      startBot();
-    } else {
-      login()
-      setTimeout(()=>{
-        startBot();
-      },7000)
-    }
-  }
-  startb()
+  // login();
+
+  startBot();
 })();
