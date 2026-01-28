@@ -1,6 +1,7 @@
 {
-    "EMAIL": "",
-    "PASSWORD": "",
+    "EMAIL": "sangdz1337@gmail.com",
+    "PASSWORD": "sangdzvcl123",
+    "OTPKEY": "0170 1791",
     "NOTIFICATION": true,
     "language": "vi",
     "notiGroup": false,
@@ -21,13 +22,13 @@
     "BOTNAME": "PCODER",
     "PREFIX": ".",
     "DEVELOPERS": [
-        "100047128875560"
+        "61553681802850"
     ],
     "ADMINBOT": [
-        "100047128875560"
+        "61553681802850"
     ],
     "NDH": [
-        "100047128875560"
+        "61553681802850"
     ],
     "DATABASE": {
         "sqlite": {
@@ -222,5 +223,6 @@
     },
     "saveAllErrorToFile": true,
     "syncmodulescomands": false,
-    "syncmodulesevents": false
+    "syncmodulesevents": false,
+    "Start": true
 }
