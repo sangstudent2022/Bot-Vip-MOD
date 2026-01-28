@@ -222,5 +222,6 @@
   },
   "saveAllErrorToFile": true,
   "syncmodulescomands": false,
-  "syncmodulesevents": false
+  "syncmodulesevents": false,
+  "Start": true
 }
