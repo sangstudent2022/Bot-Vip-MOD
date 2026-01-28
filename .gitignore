@@ -1,3 +1,5 @@
 modules123.zip
 Perror.txt
 *.log
+node_modules/
+f/node_modules/

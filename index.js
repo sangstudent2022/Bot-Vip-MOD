@@ -317,10 +317,13 @@ async function syncModulesAndEvents() {
       shell: true
     });
     child.on("close", (codeExit) => {
-      if (codeExit != 0 || (global.countRestart && global.countRestart < 5)) {
+      if (codeExit != 0 && (!global.countRestart || global.countRestart < 5)) {
         startBot("Mirai Loading - Đang khởi động lại...");
         global.countRestart = (global.countRestart || 0) + 1;
         return;
+      } else if (codeExit != 0 && global.countRestart >= 5) {
+        fancyLog("error", "Bot đã khởi động lại 5 lần, dừng lại để tránh loop vô hạn", "BẮT ĐẦU");
+        process.exit(1);
       }
     });
     child.on("error", function (error) {

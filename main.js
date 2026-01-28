@@ -498,15 +498,20 @@ function onBot({ models }) {
 // ===== Kết nối Database và khởi động Bot ===== //
 (async () => {
   try {
-    await sequelize.authenticate();
-    const authentication = { Sequelize, sequelize };
-    const models = require('./pdata/data_dongdev/database/model')(authentication);
-    logger(global.getText('mirai', 'successConnectDatabase'), '[ DATABASE ]');
-    onBot({ models: models });
+    if (sequelize) {
+      await sequelize.authenticate();
+      const authentication = { Sequelize, sequelize };
+      const models = require('./pdata/data_dongdev/database/model')(authentication);
+      logger(global.getText('mirai', 'successConnectDatabase'), '[ DATABASE ]');
+      onBot({ models: models });
+    } else {
+      logger('Database not available, starting without database...', '[ DATABASE ]');
+      onBot({ models: null });
+    }
   } catch (error) {
-    logger(global.getText('mirai', 'successConnectDatabase', JSON.stringify(error)), '[ DATABASE ]');
+    logger('Database connection failed, starting without database...', '[ DATABASE ]');
     saveError(error, "DATABASE AUTH");
-    process.exit(1);
+    onBot({ models: null });
   }
 })();
 
